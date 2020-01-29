@@ -12,10 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package main
+package controller
 
 import (
 	"fmt"
+	"github.com/haproxytech/kubernetes-ingress/controller/internal/utils"
 	"strconv"
 	"strings"
 
@@ -128,7 +129,7 @@ func (c *HAProxyController) handleHTTPRedirect(usingHTTPS bool) (reloadRequested
 	//if not defined as false, we always do redirect
 	reloadRequested = false
 	sslRedirect, _ := GetValueFromAnnotations("ssl-redirect", c.cfg.ConfigMap.Annotations)
-	enabled, err := GetBoolValue(sslRedirect.Value, "ssl-redirect")
+	enabled, err := utils.GetBoolValue(sslRedirect.Value, "ssl-redirect")
 	if err != nil {
 		return false, err
 	}
@@ -154,7 +155,7 @@ func (c *HAProxyController) handleHTTPRedirect(usingHTTPS bool) (reloadRequested
 		state = MODIFIED
 	}
 	rule := models.HTTPRequestRule{
-		ID:         ptrInt64(0),
+		ID:         utils.PtrInt64(0),
 		Type:       "redirect",
 		RedirCode:  redirectCode,
 		RedirValue: "https",

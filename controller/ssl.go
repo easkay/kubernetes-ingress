@@ -12,10 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package main
+package controller
 
 import (
 	"fmt"
+	"github.com/haproxytech/kubernetes-ingress/controller/internal/utils"
 	"io/ioutil"
 	"log"
 	"os"
@@ -283,15 +284,15 @@ func (c *HAProxyController) enableSSLPassthrough() (err error) {
 		return err
 	}
 	err = c.frontendTCPRequestRuleCreate(FrontendSSL, models.TCPRequestRule{
-		ID:      ptrInt64(0),
+		ID:      utils.PtrInt64(0),
 		Type:    "inspect-delay",
-		Timeout: ptrInt64(5000),
+		Timeout: utils.PtrInt64(5000),
 	})
 	if err != nil {
 		return err
 	}
 	err = c.frontendTCPRequestRuleCreate(FrontendSSL, models.TCPRequestRule{
-		ID:       ptrInt64(0),
+		ID:       utils.PtrInt64(0),
 		Action:   "accept",
 		Type:     "content",
 		Cond:     "if",

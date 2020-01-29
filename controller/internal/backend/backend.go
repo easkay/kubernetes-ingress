@@ -12,10 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package main
+package backend
 
 import (
 	"fmt"
+	"github.com/haproxytech/kubernetes-ingress/controller/internal/utils"
 	"strings"
 
 	"github.com/haproxytech/models"
@@ -23,8 +24,8 @@ import (
 
 type Backend models.Backend
 
-func (b *Backend) updateAbortOnClose(data *StringW) error {
-	if data.Value == "enabled" {
+func (b *Backend) UpdateAbortOnClose(value string) error {
+	if value == "enabled" {
 		b.Abortonclose = "enabled"
 	} else {
 		b.Abortonclose = ""
@@ -32,10 +33,10 @@ func (b *Backend) updateAbortOnClose(data *StringW) error {
 	return nil
 }
 
-func (b *Backend) updateBalance(data *StringW) error {
+func (b *Backend) UpdateBalance(value string) error {
 	//TODO Balance proper usage
 	val := &models.Balance{
-		Algorithm: &data.Value,
+		Algorithm: &value,
 	}
 	if err := val.Validate(nil); err != nil {
 		return fmt.Errorf("balance algorithm: %s", err)
@@ -44,8 +45,8 @@ func (b *Backend) updateBalance(data *StringW) error {
 	return nil
 }
 
-func (b *Backend) updateCheckTimeout(data *StringW) error {
-	val, err := ParseTime(data.Value)
+func (b *Backend) UpdateCheckTimeout(value string) error {
+	val, err := utils.ParseTime(value)
 	if err != nil {
 		return fmt.Errorf("timeout check: %s", err)
 	}
@@ -53,14 +54,14 @@ func (b *Backend) updateCheckTimeout(data *StringW) error {
 	return nil
 }
 
-func (b *Backend) updateForwardfor(data *StringW) error {
-	enabled, err := GetBoolValue(data.Value, "forwarded-for")
+func (b *Backend) UpdateForwardfor(value string) error {
+	enabled, err := utils.GetBoolValue(value, "forwarded-for")
 	if err != nil {
 		return err
 	}
 	if enabled {
 		b.Forwardfor = &models.Forwardfor{
-			Enabled: ptrString("enabled"),
+			Enabled: utils.PtrString("enabled"),
 		}
 	} else {
 		b.Forwardfor = nil
@@ -68,9 +69,9 @@ func (b *Backend) updateForwardfor(data *StringW) error {
 	return nil
 }
 
-func (b *Backend) updateHttpchk(data *StringW) error {
+func (b *Backend) UpdateHttpchk(value string) error {
 	var val *models.Httpchk
-	httpCheckParams := strings.Fields(strings.TrimSpace(data.Value))
+	httpCheckParams := strings.Fields(strings.TrimSpace(value))
 	switch len(httpCheckParams) {
 	case 0:
 		return fmt.Errorf("httpchk option: incorrect number of params")

@@ -12,18 +12,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package main
+package controller
 
 import (
 	"log"
-	"math/rand"
 	"os"
 	"runtime"
-	"strconv"
 	"strings"
 
 	//networking "k8s.io/api/networking/v1beta1"
 	extensions "k8s.io/api/extensions/v1beta1"
+)
+
+const (
+	LogTypeShort = log.LstdFlags
+	LogType      = log.LstdFlags | log.Lshortfile
 )
 
 func homeDir() string {
@@ -56,18 +59,6 @@ func PanicErr(err error) {
 		log.SetFlags(LogTypeShort)
 		log.Panicf("%s:%d %s\n", file1, no, err.Error())
 	}
-}
-
-var chars = []rune("0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
-
-//RandomString returns random string of size n
-func RandomString(n int) string {
-	b := make([]rune, n)
-	size := len(chars)
-	for i := range b {
-		b[i] = chars[rand.Intn(size)]
-	}
-	return string(b)
 }
 
 //ConvertIngressRules converts data from kubernetes format
@@ -108,37 +99,4 @@ func ConvertIngressTLS(ingressTLS []extensions.IngressTLS) map[string]*IngressTL
 		}
 	}
 	return tls
-}
-
-func ptrInt64(value int64) *int64 {
-	return &value
-}
-
-//nolint deadcode
-func ptrString(value string) *string {
-	return &value
-}
-
-func ParseTime(data string) (*int64, error) {
-	var v int64
-	var err error
-	switch {
-	case strings.HasSuffix(data, "ms"):
-		v, err = strconv.ParseInt(strings.TrimSuffix(data, "ms"), 10, 64)
-	case strings.HasSuffix(data, "s"):
-		v, err = strconv.ParseInt(strings.TrimSuffix(data, "s"), 10, 64)
-		v *= 1000
-	case strings.HasSuffix(data, "m"):
-		v, err = strconv.ParseInt(strings.TrimSuffix(data, "m"), 10, 64)
-		v = v * 1000 * 60
-	case strings.HasSuffix(data, "h"):
-		v, err = strconv.ParseInt(strings.TrimSuffix(data, "h"), 10, 64)
-		v = v * 1000 * 60 * 60
-	case strings.HasSuffix(data, "d"):
-		v, err = strconv.ParseInt(strings.TrimSuffix(data, "d"), 10, 64)
-		v = v * 1000 * 60 * 60 * 24
-	default:
-		v, err = strconv.ParseInt(data, 10, 64)
-	}
-	return &v, err
 }

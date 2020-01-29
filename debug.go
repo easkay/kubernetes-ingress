@@ -16,6 +16,7 @@ package main
 
 import (
 	"fmt"
+	c "github.com/haproxytech/kubernetes-ingress/controller"
 	"log"
 	"os"
 	"os/exec"
@@ -24,14 +25,18 @@ import (
 	"time"
 )
 
+const (
+	TestFolderPath = "/tmp/haproxy-ingress/"
+)
+
 func setupTestEnv() {
 	log.Printf("Running in test env")
 	err := os.MkdirAll(TestFolderPath, 0755)
-	LogErr(err)
+	log.Println(err)
 	time.Sleep(2 * time.Second)
-	HAProxyCFG = path.Join(TestFolderPath, HAProxyCFG)
-	HAProxyCertDir = path.Join(TestFolderPath, HAProxyCertDir)
-	HAProxyStateDir = path.Join(TestFolderPath, HAProxyStateDir)
+	c.HAProxyCFG = path.Join(TestFolderPath, c.HAProxyCFG)
+	c.HAProxyCertDir = path.Join(TestFolderPath, c.HAProxyCertDir)
+	c.HAProxyStateDir = path.Join(TestFolderPath, c.HAProxyStateDir)
 	cmd := exec.Command("pwd")
 	out, err := cmd.CombinedOutput()
 	if err != nil {
@@ -42,7 +47,7 @@ func setupTestEnv() {
 		log.Fatal(err)
 	}
 	log.Println(dir)
-	copyFile(path.Join(dir, "fs/etc/haproxy/haproxy.cfg"), HAProxyCFG)
+	copyFile(path.Join(dir, "fs/etc/haproxy/haproxy.cfg"), c.HAProxyCFG)
 	log.Println(string(out))
 }
 
@@ -51,5 +56,5 @@ func copyFile(src, dst string) {
 	log.Println(cmd)
 	result := exec.Command("bash", "-c", cmd)
 	_, err := result.CombinedOutput()
-	LogErr(err)
+	log.Println(err)
 }

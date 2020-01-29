@@ -12,13 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package main
+package controller
 
 import (
 	"fmt"
 	"log"
 	"sort"
 
+	"github.com/haproxytech/kubernetes-ingress/controller/internal/utils"
 	"github.com/haproxytech/models"
 )
 
@@ -103,7 +104,7 @@ func (c *HAProxyController) refreshBackendSwitching() (needsReload bool) {
 				Cond:     "if",
 				CondTest: condTest,
 				Name:     rule.Backend,
-				ID:       ptrInt64(0),
+				ID:       utils.PtrInt64(0),
 			})
 			PanicErr(err)
 		}

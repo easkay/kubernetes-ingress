@@ -12,11 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package main
+package controller
 
 import (
 	"context"
 	"fmt"
+	"github.com/haproxytech/kubernetes-ingress/controller/internal/utils"
 	"log"
 	"os"
 	"os/exec"
@@ -223,7 +224,7 @@ func (c *HAProxyController) handleEndpointIP(namespace *Namespace, ingress *Ingr
 		Name:    ip.HAProxyName,
 		Address: ip.IP,
 		Port:    &path.TargetPort,
-		Weight:  ptrInt64(128),
+		Weight:  utils.PtrInt64(128),
 	}
 	if ip.Disabled {
 		server.Maintenance = "enabled"

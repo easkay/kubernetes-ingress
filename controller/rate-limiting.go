@@ -12,29 +12,30 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package main
+package controller
 
 import (
 	"fmt"
+	"github.com/haproxytech/kubernetes-ingress/controller/internal/utils"
 
 	"github.com/haproxytech/client-native/misc"
 	"github.com/haproxytech/models"
 )
 
 var ratelimitACL1 = models.ACL{
-	ID:        ptrInt64(0),
+	ID:        utils.PtrInt64(0),
 	ACLName:   "ratelimit_is_abuse",
 	Criterion: "src_http_req_rate(RateLimit)",
 	Value:     "ge 10",
 }
 var ratelimitACL2 = models.ACL{
-	ID:        ptrInt64(0),
+	ID:        utils.PtrInt64(0),
 	ACLName:   "ratelimit_inc_cnt_abuse",
 	Criterion: "src_inc_gpc0(RateLimit)",
 	Value:     "gt 0",
 }
 var ratelimitACL3 = models.ACL{
-	ID:        ptrInt64(0),
+	ID:        utils.PtrInt64(0),
 	ACLName:   "ratelimit_cnt_abuse",
 	Criterion: "src_get_gpc0(RateLimit)",
 	Value:     "gt 0",
@@ -47,10 +48,10 @@ func (c *HAProxyController) handleRateLimiting(usingHTTPS bool) (needReload bool
 	annRateLimitExpire, _ := GetValueFromAnnotations("rate-limit-expire", c.cfg.ConfigMap.Annotations)
 	annRateLimitInterval, _ := GetValueFromAnnotations("rate-limit-interval", c.cfg.ConfigMap.Annotations)
 	annRateLimitSize, _ := GetValueFromAnnotations("rate-limit-size", c.cfg.ConfigMap.Annotations)
-	rateLimitExpire, _ := ParseTime(annRateLimitExpire.Value)
+	rateLimitExpire, _ := utils.ParseTime(annRateLimitExpire.Value)
 	rateLimitSize := misc.ParseSize(annRateLimitSize.Value)
 
-	enabled, err := GetBoolValue(annRateLimit.Value, "rate-limit")
+	enabled, err := utils.GetBoolValue(annRateLimit.Value, "rate-limit")
 	if err != nil {
 		return false, err
 	}
@@ -79,25 +80,25 @@ func (c *HAProxyController) handleRateLimiting(usingHTTPS bool) (needReload bool
 	}
 
 	tcpRequest1 := &models.TCPRequestRule{
-		ID:     ptrInt64(0),
+		ID:     utils.PtrInt64(0),
 		Type:   "connection",
 		Action: "track-sc0 src table RateLimit",
 	}
 	tcpRequest2 := &models.TCPRequestRule{
-		ID:       ptrInt64(0),
+		ID:       utils.PtrInt64(0),
 		Type:     "connection",
 		Action:   "reject",
 		Cond:     "if",
 		CondTest: ratelimitACL3.ACLName,
 	}
 	httpRequest1 := &models.HTTPRequestRule{
-		ID:       ptrInt64(0),
+		ID:       utils.PtrInt64(0),
 		Type:     "deny",
 		Cond:     "if",
 		CondTest: fmt.Sprintf("%s %s", ratelimitACL1.ACLName, ratelimitACL2.ACLName),
 	}
 	httpRequest2 := &models.HTTPRequestRule{
-		ID:       ptrInt64(0),
+		ID:       utils.PtrInt64(0),
 		Type:     "deny",
 		Cond:     "if",
 		CondTest: ratelimitACL3.ACLName,
